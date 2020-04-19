@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+  <!-- Carga D3 -->
+  <script src="d3.js"></script>
+  <!-- Fuente para tooltip fallido -->
+  <!-- <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script> -->
+	<style>
+
+  /*CSS para los ejes*/
+	.axis {
+	  font: 10px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+   /*CSS de un tooltip fallido*/
+  .d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/*CSS para el tooltip*/
+#tooltip {
+        position: absolute;
+        width: 100px;
+        height: auto;
+        padding: 10px;
+        background-color: white;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+      
+      #tooltip.hidden {
+        display: none;
+      }
+      
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 16px;
+        line-height: 20px;
+      }
+
+	</style>
+</head>
+
+<body>
+	
+<!-- Define tooltip. Cambiar 'A la fecha' por la fecha real -->
+<div id="tooltip" class="hidden">
+      <p><strong>Fecha X:</strong></p>
+      <p><span id="value"> </span> %</p>
+    </div>
+
+<p> Número de casos por región el día X</p>
+
+<!-- Inicia script de d3 -->
+
+<script type="text/javascript">
+
+
+//Define margenes
+
+var margin = {top: 20, right: 20, bottom: 70, left: 40},
+w = 800 - margin.left - margin.right,
+h = 600 - margin.top - margin.bottom;
+hh= 300 - margin.bottom;
+
+//Define función de escala. Solo se especifica el tipo y el rango. Dominio sera definido en funcion de los datos. Idealmente, la escala de la fecha debiera ser ordinal.
+
+var xScale = d3.scaleLinear().range([0,w]);
+
+//Escala vertical es ordinal
+
+var yScale = d3.scaleLinear().range([0,h]);
+
+var bandScale = d3.scaleBand().range([0,h]);
+
+//Define las funciones ejes
+
+var xAxis = d3.axisBottom()
+          .scale(xScale)
+          .ticks(10);
+
+var yAxis = d3.axisLeft()
+        .scale(yScale)
+        .ticks(10);
+
+
+//Define SVG que contiene al grafico
+
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width",w+ margin.left + 3*margin.right)
+            .attr("height",h+ margin.top + margin.bottom);
+
+//Carga los datos y dibuja el grafico. Observar que todo el codigo del grafico esta concatenado con la funcion d3.csv()
+
+//Notar que el primer paso le entrega un array al paso siguiente
+
+var datos =
+  d3.csv("regiones.csv",function(d){
+    return [d.Region,+d.Totales]; 
+  }).
+  then(function(data){
+
+
+    var ordData = data.sort(function(a,b){return d3.descending(a[1],b[1])});
+
+    console.log(ordData);
+
+    var comunas = [];
+    var largo = ordData.length;
+    console.log(largo);
+
+    for (i=0;i<largo;i++){
+      comunas.push([i,ordData[i][0],ordData[i][1]]);
+    }
+
+    console.log(comunas);
+
+    xScale.domain([0,d3.max(ordData,function(d){return d[1];})]);
+    //yScale.domain([0,largo]);
+    bandScale.domain(comunas);
+
+    console.log(yScale(3));
+
+    var altura = h/largo-1;
+
+    const color = d3.scaleOrdinal(d3.schemeCategory10)
+
+    var pegoteo = function(a,b){return a+": "+b+" casos.";};
+
+
+
+    svg.selectAll("rect")
+      .data(comunas)
+      .enter()
+      .append("rect")
+      .attr("y", function(d){return bandScale(d);})
+      .attr("height",altura)
+      .attr("width",function(d){return xScale(d[2])})
+      .attr("fill", color);
+      
+
+    svg.selectAll("text")
+      .data(comunas)
+      .enter()
+      .append("text")
+      .attr("y", function(d){return bandScale(d)+ altura/2;})
+      .attr("x",function(d){return xScale(d[2])+2})
+      .attr("font-size",10)
+      .text(function(d){return pegoteo(d[1],d[2])});
+
+   
+    
+
+});
+
+
+
+</script>
+
+
+</body>
