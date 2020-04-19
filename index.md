@@ -4,8 +4,6 @@
 <head>
   <!-- Carga D3 -->
   <script src="d3.js"></script>
-  <!-- Fuente para tooltip fallido -->
-  <!-- <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script> -->
 	<style>
 
   /*CSS para los ejes*/
