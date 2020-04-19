@@ -68,7 +68,7 @@
       <p><span id="value"> </span> %</p>
     </div>
 
-<p>Crecimiento porcentual diario:</p>
+<p>Crecimiento porcentual diario desde xxx:</p>
 
 <!-- Inicia script de d3 -->
 
@@ -80,6 +80,7 @@
 var margin = {top: 20, right: 20, bottom: 70, left: 40},
 w = 600 - margin.left - margin.right,
 h = 300 - margin.top - margin.bottom;
+hh= 300 - margin.bottom;
 
 //Define función de escala. Solo se especifica el tipo y el rango. Dominio sera definido en funcion de los datos. Idealmente, la escala de la fecha debiera ser ordinal.
 
@@ -92,7 +93,7 @@ var xAxis = d3.axisBottom()
           .scale(xScale)
           .ticks(10);
 
-      var yAxis = d3.axisLeft()
+var yAxis = d3.axisLeft()
         .scale(yScale)
         .ticks(10);
 
@@ -104,6 +105,8 @@ var svg = d3.select("body")
             .attr("height",h+ margin.top + margin.bottom);
 
 //Carga los datos y dibuja el grafico. Observar que todo el codigo del grafico esta concatenado con la funcion d3.csv()
+
+//Notar que el primer paso le entrega un array al paso siguiente
 
 var datos =
   d3.csv("serie-valpo.csv",function(d){
@@ -120,7 +123,7 @@ var datos =
 
     svg.append("g")
             .attr("class", "x axis")
-          .attr("transform", "translate("+margin.left+"," + h + ")")
+          .attr("transform", "translate("+margin.left+"," + hh +")")
           .call(xAxis)
           .selectAll("text")
           .style("text-anchor", "end")
@@ -133,13 +136,14 @@ var datos =
     svg.append("g")
           .attr("class", "y axis")
           .call(yAxis)
-          .attr("transform","translate("+margin.left+",0)")
-          .append("text")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 6)
+          .attr("transform","translate("+margin.left+","+margin.top+")");
+
+    //Antiguo titulo de eje y (originalmente en llamado del eje)
+    svg.append("text")
+          .attr("transform","translate("+3*margin.left/2+","+margin.top+")")
           .attr("dy", ".71em")
           .style("text-anchor", "end")
-          .text("Crecimiento porcentual");
+          .text("%");
 
     //Intento fallido de tooltip
     //var tip = d3.tip()
@@ -153,7 +157,7 @@ var datos =
       .append("rect")
       .attr("x", function(d) { return xScale(d[0])+margin.left; })
       .attr("width", 10)
-      .attr("y", function(d) { return yScale(d[1]); })
+      .attr("y", function(d) { return yScale(d[1])+margin.top; })
       .attr("height", function(d){return h - yScale(d[1])})
       .attr("fill","steelblue")
       .on("mouseover", function(d) {
