@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+  <!-- Carga D3 -->
+  <!-- <script src="d3.js"></script> -->
+  <script src="d3.js" charset="utf-8"></script>
+  <!-- Fuente para tooltip fallido -->
+  <!-- <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script> -->
+	<style>
+
+	</style>
+</head>
+
+<body>
+
+
+
+<p> Las 5 comunas con más casos el día X</p>
+
+
+
+<!-- Inicia script de d3 -->
+
+<script type="text/javascript">
+
+var w = 700;
+var h = 500;
+var inradius = 60;
+var outradius = 150;
+
+var numRegiones = 5;
+var rectw = w/(4*numRegiones);
+var recth = rectw;
+
+var svg = d3.select("body").append("svg")
+    .attr("width", w)
+    .attr("height", h);
+    
+      
+var g = svg.append("g")
+    .attr("transform", "translate(" + outradius + "," + outradius + ")") ;
+
+
+
+var pie = d3.pie().value(function(d) { 
+     return d[2]; 
+});
+
+var path = d3.arc()
+    .outerRadius(outradius)
+    .innerRadius(inradius);
+ 
+
+
+const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+
+
+var datos =
+  d3.csv("serie-comunas-2.csv",function(d){
+    return [d.Comuna,+d.Ultimo]; 
+  }).
+  then(function(data){
+
+    var ordData = data.sort(function(a,b){return d3.descending(a[1],b[1])});
+
+    var regiones = [];
+    var largo = data.length;
+
+    for (i=0;i<numRegiones;i++){
+      regiones.push([i,ordData[i][0],ordData[i][1]]);
+    }
+
+
+    var arc = g.selectAll()
+    .data(pie(regiones))
+    .enter()
+    .append("g");
+
+    arc.append("path")
+    .attr("d", path)
+    .attr("fill", function(d,i){return color(i);});
+
+    svg.selectAll("rect")
+      .data(regiones)
+      .enter()
+      .append("rect")
+      .attr("height",recth)
+      .attr("width",rectw)
+      .attr("x",w/2+10)
+      .attr("y", function(d,i){return recth*i*3/2+recth;})
+      .attr("fill",function(d,i){return color(i);});
+
+    var pegoteo = function(a,b){return a+": "+b+" casos.";};
+
+    svg.selectAll("text")
+      .data(regiones)
+      .enter()
+      .append("text")
+      .attr("x",w/2+10+rectw+10)
+      .attr("y", function(d,i){return recth*i*3/2+3*recth/2;})
+      .text(function(d){return pegoteo(d[1],d[2])});
+  
+ });   
+
+</script>
+
+
+
+</body>

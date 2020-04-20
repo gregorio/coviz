@@ -123,23 +123,19 @@ var datos =
 
     var ordData = data.sort(function(a,b){return d3.descending(a[1],b[1])});
 
-    console.log(ordData);
 
     var comunas = [];
     var largo = ordData.length;
-    console.log(largo);
 
     for (i=0;i<largo;i++){
       comunas.push([i,ordData[i][0],ordData[i][1]]);
     }
 
-    console.log(comunas);
 
     xScale.domain([0,d3.max(ordData,function(d){return d[1];})]);
     //yScale.domain([0,largo]);
     bandScale.domain(comunas);
 
-    console.log(yScale(3));
 
     var altura = h/largo-1;
 
